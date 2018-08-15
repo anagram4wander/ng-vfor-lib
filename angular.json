@@ -121,6 +121,41 @@
           }
         }
       }
+    },
+    "ngVFor-lib": {
+      "root": "projects/ng-vfor-lib",
+      "sourceRoot": "projects/ng-vfor-lib/src",
+      "projectType": "library",
+      "prefix": "lib",
+      "targets": {
+        "build": {
+          "builder": "@angular-devkit/build-ng-packagr:build",
+          "options": {
+            "tsConfig": "projects/ng-vfor-lib/tsconfig.lib.json",
+            "project": "projects/ng-vfor-lib/ng-package.json"
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "projects/ng-vfor-lib/src/test.ts",
+            "tsConfig": "projects/ng-vfor-lib/tsconfig.spec.json",
+            "karmaConfig": "projects/ng-vfor-lib/karma.conf.js"
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "projects/ng-vfor-lib/tsconfig.lib.json",
+              "projects/ng-vfor-lib/tsconfig.spec.json"
+            ],
+            "exclude": [
+              "**/node_modules/**"
+            ]
+          }
+        }
+      }
     }
   },
   "defaultProject": "ngGUD"

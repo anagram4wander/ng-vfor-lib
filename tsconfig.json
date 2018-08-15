@@ -16,6 +16,14 @@
     "lib": [
       "es2017",
       "dom"
-    ]
+    ],
+    "paths": {
+      "ngVFor-lib": [
+        "dist/ng-vfor-lib"
+      ],
+      "ngVFor-lib/*": [
+        "dist/ng-vfor-lib/*"
+      ]
+    }
   }
 }

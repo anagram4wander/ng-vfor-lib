@@ -1,16 +1,12 @@
-.data-list-container {
+.nggud-data-list-container {
     height: 100%;
     flex:1;
     overflow-y: auto;
     position: relative;
-  }
+}
   
-  .data-list-items-container {
-    width: 100%;
-  }
-  
-  .total-height {
+.nggud_total-height {
     width: 1px;
     opacity: 0;
-  }
+}
   

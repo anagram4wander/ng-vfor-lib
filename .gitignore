@@ -1,7 +1,16 @@
 # See http://help.github.com/ignore-files/ for more about ignoring files.
 
 # compiled output
-/dist
+/dist/ng-vfor-lib/bundles
+/dist/ng-vfor-lib/esm5
+/dist/ng-vfor-lib/esm2015
+/dist/ng-vfor-lib/fesm5
+/dist/ng-vfor-lib/fesm2015
+/dist/ng-vfor-lib/lib
+/dist/ng-vfor-lib/ng*
+/dist/ng-vfor-lib/package.json
+/dist/ng-vfor-lib/public_api.d.ts
+
 /tmp
 /out-tsc
 
