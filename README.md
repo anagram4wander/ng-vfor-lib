@@ -1,6 +1,6 @@
 ## Virtualization of ngFor — Welcome to the pure ngFor replacement — ngVFor !
 
-We love the Angular framework at [Alpha Chi Technology](http:www.alphachitech.com). It’s a fantastic
+We love the Angular framework at [Alpha Chi Technology](http://www.alphachitech.com). It’s a fantastic
 framework that really does expose most of what we need. We have been using it
 since version 1 to produce some of the most complex, deep systems around. BIG
 systems. But — this is a big caveat — creating these large applications with
