@@ -2,22 +2,15 @@ import {
     Directive,
     ElementRef,
     Input,
-    OnChanges,
     OnInit,
     HostListener,
-    Output,
-    Renderer,
     ContentChild,
-    forwardRef,
     AfterContentInit,
     OnDestroy,
-    Injector,
     AfterViewInit
 } from '@angular/core';
-import { Subject, Observable, Subscription, of } from 'rxjs';
+import { Subject, Subscription, of } from 'rxjs';
 import { switchMap} from 'rxjs/operators';
-// import { NgVForDirective } from './ng-vFor.directive';
-// import { NgGUDVForChannelService, NgVForContainerChildPair } from '../services/ng-gud-vFor-channel.service';
 
 @Directive({
     // tslint:disable-next-line:directive-selector
@@ -29,7 +22,6 @@ export class NgVForContainerDirective implements OnInit, AfterContentInit, After
     @Input() scrollbarHeight: number;
     @Input() customSize: Function = null;
     @ContentChild('totalHeight') totalHeight: ElementRef;
-    // @ContentChild(forwardRef(() => NgVForDirective)) vrItems: NgVForDirective<any>;
 
     scroll$: Subject<Event> = new Subject<Event>();
     scrollHeight: number;
@@ -42,7 +34,6 @@ export class NgVForContainerDirective implements OnInit, AfterContentInit, After
     private saved_child_width = 0;
     private dimensions: any;
     private scrollSubscription: Subscription = null;
-//    private _channel: NgVForContainerChildPair = null;
     private vrItems = null;
 
     @HostListener('scroll')
@@ -61,13 +52,11 @@ export class NgVForContainerDirective implements OnInit, AfterContentInit, After
         this.scrollbarWidth = 0;
         this.scrollbarHeight = 0;
 
-        // this._channel = this._channelService.registerContainer(this.elRef.nativeElement, this);
     }
 
     ngOnDestroy() {
-        // if (this._channel !== null) {
-        //     this._channelService.unregisterContainer(this._channel.nativeElementOfContainer);
-        // }
+        this.vrItems = null;
+        this.scroll$.complete();
     }
 
     directAttach(target) {
@@ -79,12 +68,7 @@ export class NgVForContainerDirective implements OnInit, AfterContentInit, After
         console.log('now attaching update');
         if (this.vrItems !== null && this.vrItems !== undefined) {
             this.attachUpdate(this.vrItems);
-        } /* else {
-            if (this._channel !== null && this._channel.target !== null) {
-                this.vrItems = this._channel.target;
-                this.attachUpdate(this.vrItems);
-            }
-        } */
+        }
     }
 
     ngAfterViewInit() {

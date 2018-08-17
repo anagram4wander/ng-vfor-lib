@@ -1,4 +1,11 @@
-<div ngVForContainer #container class='nggud-data-list-container'>
+<div ngVForContainer 
+    #container 
+    class='nggud-data-list-container' 
+    [scrollTop]='scrollTop'
+    [scrollbarHeight]='scrollbarHeight'
+    [scrollbarWidth]='scrollbarWidth'
+    [customSize]='customSize'
+    >
   <div class="nggud-total-height" #totalHeight></div>
   <div style="position: absolute; top: 0px">
     <ng-content></ng-content>

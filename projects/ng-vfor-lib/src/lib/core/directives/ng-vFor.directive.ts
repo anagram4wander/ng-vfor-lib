@@ -167,6 +167,7 @@ export class NgVForDirective<T> implements OnChanges, OnDestroy, OnInit, DoCheck
       this._cachedViews[loop].destroy();
     }
     this._cachedViews = [];
+    this.update.complete();
   }
 
   ngDoCheck(): void {

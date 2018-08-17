@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, AfterContentInit } from '@angular/core';
+import { Component, OnInit, ViewChild, Input, AfterContentInit } from '@angular/core';
 import { NgVForContainerDirective } from '../../directives/ng-vFor-container.directive';
 
 @Component({
@@ -11,6 +11,11 @@ export class NgGUDItemsControlComponent implements OnInit, AfterContentInit {
   private _target;
 
   @ViewChild(NgVForContainerDirective) _container: NgVForContainerDirective;
+
+  @Input() scrollTop: Number = 0;
+  @Input() scrollbarWidth: number;
+  @Input() scrollbarHeight: number;
+  @Input() customSize: Function = null;
 
   constructor() { }
 
