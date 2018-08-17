@@ -16,8 +16,8 @@ import {
 } from '@angular/core';
 import { Subject, Observable, Subscription, of } from 'rxjs';
 import { switchMap} from 'rxjs/operators';
-import { NgVForDirective } from './ng-vFor.directive';
-import { NgGUDVForChannelService, NgVForContainerChildPair } from '../services/ng-gud-vFor-channel.service';
+// import { NgVForDirective } from './ng-vFor.directive';
+// import { NgGUDVForChannelService, NgVForContainerChildPair } from '../services/ng-gud-vFor-channel.service';
 
 @Directive({
     // tslint:disable-next-line:directive-selector
@@ -29,7 +29,7 @@ export class NgVForContainerDirective implements OnInit, AfterContentInit, After
     @Input() scrollbarHeight: number;
     @Input() customSize: Function = null;
     @ContentChild('totalHeight') totalHeight: ElementRef;
-    @ContentChild(forwardRef(() => NgVForDirective)) vrItems: NgVForDirective<any>;
+    // @ContentChild(forwardRef(() => NgVForDirective)) vrItems: NgVForDirective<any>;
 
     scroll$: Subject<Event> = new Subject<Event>();
     scrollHeight: number;
@@ -42,14 +42,15 @@ export class NgVForContainerDirective implements OnInit, AfterContentInit, After
     private saved_child_width = 0;
     private dimensions: any;
     private scrollSubscription: Subscription = null;
-    private _channel: NgVForContainerChildPair = null;
+//    private _channel: NgVForContainerChildPair = null;
+    private vrItems = null;
 
     @HostListener('scroll')
     onScroll(e: Event) {
       this.scroll$.next();
     }
 
-    constructor(private elRef: ElementRef, private _channelService: NgGUDVForChannelService) {
+    constructor(private elRef: ElementRef /*, private _channelService: NgGUDVForChannelService */) {
     }
 
     ngOnInit() {
@@ -60,24 +61,30 @@ export class NgVForContainerDirective implements OnInit, AfterContentInit, After
         this.scrollbarWidth = 0;
         this.scrollbarHeight = 0;
 
-        this._channel = this._channelService.registerContainer(this.elRef.nativeElement, this);
+        // this._channel = this._channelService.registerContainer(this.elRef.nativeElement, this);
     }
 
     ngOnDestroy() {
-        if (this._channel !== null) {
-            this._channelService.unregisterContainer(this._channel.nativeElementOfContainer);
-        }
+        // if (this._channel !== null) {
+        //     this._channelService.unregisterContainer(this._channel.nativeElementOfContainer);
+        // }
+    }
+
+    directAttach(target) {
+        console.log('direct attach');
+        this.vrItems = target;
     }
 
     ngAfterContentInit() {
+        console.log('now attaching update');
         if (this.vrItems !== null && this.vrItems !== undefined) {
             this.attachUpdate(this.vrItems);
-        } else {
+        } /* else {
             if (this._channel !== null && this._channel.target !== null) {
                 this.vrItems = this._channel.target;
                 this.attachUpdate(this.vrItems);
             }
-        }
+        } */
     }
 
     ngAfterViewInit() {
@@ -103,7 +110,10 @@ export class NgVForContainerDirective implements OnInit, AfterContentInit, After
         }
     }
 
-    public attachUpdate(element: NgVForDirective<any>) {
+    public attachUpdate(element) {
+        if (this.vrItems === null || this.vrItems === undefined) {
+            this.vrItems = element;
+        }
         // Wire in the update event
         element.update.subscribe((u) => {
             this.refresh();

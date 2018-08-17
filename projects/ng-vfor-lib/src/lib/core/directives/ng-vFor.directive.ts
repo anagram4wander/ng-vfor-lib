@@ -2,13 +2,13 @@ import {
   Directive, DoCheck, EmbeddedViewRef, Input, IterableChangeRecord,
   OnInit, OnChanges, SimpleChanges, IterableChanges, IterableDiffer, IterableDiffers,
   TemplateRef, TrackByFunction, ElementRef, ViewContainerRef, isDevMode, EventEmitter,
-  Output, AfterContentInit, OnDestroy
+  Output, AfterContentInit, OnDestroy, SkipSelf, Optional
 } from '@angular/core';
 import {
   NgForOfContext
 } from '@angular/common';
 
-import { NgGUDVForChannelService } from '../services/ng-gud-vFor-channel.service';
+import { NgGUDItemsControlComponent} from '../components/ng-guditems-control/ng-guditems-control.component';
 
 export type NgGUDIterable<T> = Array<T> | Iterable<T>;
 
@@ -54,7 +54,7 @@ export class NgVForDirective<T> implements OnChanges, OnDestroy, OnInit, DoCheck
     private _viewContainer: ViewContainerRef,
     private _template: TemplateRef<NgForOfContext<T>>,
     private _differs: IterableDiffers,
-    private _channelService: NgGUDVForChannelService
+    @Optional() @SkipSelf() private _viewPortContainer: NgGUDItemsControlComponent
   ) { }
 
   private parentType: string;
@@ -71,6 +71,7 @@ export class NgVForDirective<T> implements OnChanges, OnDestroy, OnInit, DoCheck
   private _newViewPort: ViewPort = null;
   private _cachedViews: EmbeddedViewRef<NgForOfContext<T>>[] = [];
   private _trackByFn !: TrackByFunction<T>;
+  private _noContainer = false;
 
   // region Properties
 
@@ -146,12 +147,16 @@ export class NgVForDirective<T> implements OnChanges, OnDestroy, OnInit, DoCheck
     } else {
       this.content.style.position = 'absolute';
     }
+    if (this._viewPortContainer !== null && this._viewPortContainer !== undefined) {
+      console.log('got viewport container');
+      this._viewPortContainer.attach(this);
+    } else {
+      this._noContainer = true;
+      this.ngDoCheck();
+    }
   }
 
   ngAfterContentInit() {
-    if (this._channelService !== null) {
-      this._channelService.registerVFor(this._elRef.nativeElement, this);
-    }
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -166,6 +171,7 @@ export class NgVForDirective<T> implements OnChanges, OnDestroy, OnInit, DoCheck
 
   ngDoCheck(): void {
     if (this._dirty) {
+      console.log('in do check');
       this._dirty = false;
       if (!this._differ && this._iterable) {
         try {
@@ -181,9 +187,11 @@ export class NgVForDirective<T> implements OnChanges, OnDestroy, OnInit, DoCheck
       }
     }
     if (this._newViewPort !== null && this._newViewPort !== undefined) {
-      const nvp = this._newViewPort;
-      this._newViewPort = null;
-      this.renderViewPort(nvp.topPosition, nvp.start, nvp.end);
+      if (this._noContainer === false) {
+        const nvp = this._newViewPort;
+        this._newViewPort = null;
+        this.renderViewPort(nvp.topPosition, nvp.start, nvp.end);
+      }
     }
   }
 
@@ -205,8 +213,9 @@ export class NgVForDirective<T> implements OnChanges, OnDestroy, OnInit, DoCheck
     changes.forEachOperation(
       (item: IterableChangeRecord<any>, adjustedPreviousIndex: number, currentIndex: number) => {
         if (item.previousIndex == null) {
+          // insert
           this._length++;
-          if (currentIndex >= vp.start && currentIndex <= vp.end) {
+          if (this._noContainer === true || (currentIndex >= vp.start && currentIndex <= vp.end)) {
             let view = this.getNewView();
             if (view) {
               this._viewContainer.insert(view, currentIndex - vp.start);
@@ -217,17 +226,22 @@ export class NgVForDirective<T> implements OnChanges, OnDestroy, OnInit, DoCheck
             }
           }
         } else if (currentIndex == null) {
-          this.cacheView(this._viewContainer.detach(adjustedPreviousIndex - vp.start) as EmbeddedViewRef<NgForOfContext<T>>);
+          // remove
           this._length--;
+          if (this._noContainer === true || (adjustedPreviousIndex >= vp.start && adjustedPreviousIndex <= vp.end)) {
+            this.cacheView(this._viewContainer.detach(adjustedPreviousIndex - vp.start) as EmbeddedViewRef<NgForOfContext<T>>);
+          }
         } else {
+          // move
           const view = this._viewContainer.get(adjustedPreviousIndex);
           if (view !== null && view !== undefined) {
-            if (currentIndex >= vp.start && currentIndex <= vp.end) {
+            if (this._noContainer === true || (currentIndex >= vp.start && currentIndex <= vp.end &&
+              adjustedPreviousIndex >= vp.start && adjustedPreviousIndex <= vp.end)) {
               this._viewContainer.move(view, currentIndex - vp.start);
-              this._length++;
             } else {
-              this.cacheView(this._viewContainer.detach(adjustedPreviousIndex - vp.start) as EmbeddedViewRef<NgForOfContext<T>>);
-              this._length--;
+              if (adjustedPreviousIndex >= vp.start && adjustedPreviousIndex <= vp.end) {
+                this.cacheView(this._viewContainer.detach(adjustedPreviousIndex - vp.start) as EmbeddedViewRef<NgForOfContext<T>>);
+              }
             }
           }
         }
@@ -243,7 +257,7 @@ export class NgVForDirective<T> implements OnChanges, OnDestroy, OnInit, DoCheck
     }
 
     changes.forEachIdentityChange((record: any) => {
-      if (record.currentIndex >= vp.start && record.currentIndex <= vp.end) {
+      if (this._noContainer === true || (record.currentIndex >= vp.start && record.currentIndex <= vp.end)) {
         const viewRef =
           <EmbeddedViewRef<NgForOfContext<T>>>this._viewContainer.get(record.currentIndex - vp.start);
         if (viewRef !== null && viewRef !== undefined) {
@@ -290,9 +304,12 @@ export class NgVForDirective<T> implements OnChanges, OnDestroy, OnInit, DoCheck
   }
 
   private cacheView(view: EmbeddedViewRef<NgForOfContext<T>>) {
+    if (view == null) { return; }
     if (this.getCachedViewsBufferSize() >= this._cachedViews.length) {
       this._cachedViews.push(view);
-      view.context.$implicit = null;
+      if (view.context !== null && view.context !== undefined) {
+        view.context.$implicit = null;
+      }
     } else {
       view.destroy();
     }
