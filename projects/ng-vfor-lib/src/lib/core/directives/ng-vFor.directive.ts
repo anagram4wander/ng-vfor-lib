@@ -267,9 +267,14 @@ export class NgVForDirective<T> implements OnChanges, OnDestroy, OnInit, DoCheck
       }
     });
 
+    // If the length has shortened the viewport then we need to take that into account
+    if (this.length < vp.end) {
+      vp.end = this.length;
+      vp.start = Math.min(vp.start, this.length);
+      this._lastViewPort = vp;
+    }
 
     // emit a somethings changed event
-
     this.update.emit(new NgVForNeedsUpdateArgs(this.length));
 
   }
@@ -328,7 +333,7 @@ export class NgVForDirective<T> implements OnChanges, OnDestroy, OnInit, DoCheck
 
   private renderViewPort(topPosition: number, start: number, end: number) {
     this.topPosition = topPosition;
-    const vp = new ViewPort(topPosition, start, end);
+    const vp = new ViewPort(topPosition, Math.min(start, this.length), Math.min(end, this.length));
     const lastViewPort = this._lastViewPort;
     this._lastViewPort = vp;
     const lastViewPortExtent = lastViewPort.end - lastViewPort.start + 1;
