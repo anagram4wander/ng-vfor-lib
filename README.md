@@ -139,7 +139,7 @@ Time for some improvements. First we need the npm package with the virtual
 ngVFor implementation.
 
 ```
-npm install ng-vfor-lib
+npm install ngvforlib
 ```
     
 And then import and add to the imports section the `NgGUDCoreModule` into 
